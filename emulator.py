@@ -47,7 +47,7 @@ st.markdown("""
 # Function to load model
 def load_model(model_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = LSTMModel(input_size=1, architecture=[200, 100, 50])
+    model = LSTMModel(input_size=1, architecture=[256, 128, 64, 32])
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.to(device)
     model.eval()
@@ -200,7 +200,7 @@ if uploaded_file:
     unique_runs = test_data[run_column].unique()
     selected_runs = st.multiselect(f"📊 Select {run_column}(s) to estimate", unique_runs, default=unique_runs[:1])
 
-    model_path = "src/trained_model/3_layers_model.pth"
+    model_path = "src/trained_model/4_layers_model.pth"
     window_size = 10
     model, device = load_model(model_path)
 
