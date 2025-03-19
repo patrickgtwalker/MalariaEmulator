@@ -87,9 +87,8 @@ def convert_time_column(df, time_column):
         return None
 
 
-# Function to plot predictions with better color scheme
+# Function to plot predictions/estimates
 def plot_predictions(test_data, run_column, time_column, selected_runs, model, device, window_size, log_eir, log_inc, log_all, has_true_values):#JA
-#def plot_predictions(test_data, run_column, time_column, selected_runs, model, device, window_size, log_eir, log_inc, has_true_values):
     log_transform = lambda x: np.log(x + 1e-8)
     inverse_log_transform = lambda x: np.exp(x) - 1e-8
 
@@ -111,20 +110,20 @@ def plot_predictions(test_data, run_column, time_column, selected_runs, model, d
     # Define color palette
     colors = sns.color_palette("muted", 3)
 
-    data_to_download = [] #JA
+    data_to_download = [] 
     for i, run in enumerate(selected_runs):
         run_data = test_data[test_data[run_column] == run]
 
-        if run_data.empty:#JA
+        if run_data.empty:
             st.warning(f"Invalid run column selected: {run}")
-            continue#JA
+            continue
         scaled_run_data, _ = preprocess_data(run_data)
 
         X_test_scaled, y_test_scaled = create_sequences(scaled_run_data, window_size)
         
-        if len(X_test_scaled) == 0: #JA
+        if len(X_test_scaled) == 0: 
             st.warning(f"Select valid run (region, district) column and/or time column where applicable.")
-            return #JA
+            return 
         
         X_test_scaled = X_test_scaled.to(device)
 
@@ -132,7 +131,7 @@ def plot_predictions(test_data, run_column, time_column, selected_runs, model, d
             test_predictions_scaled = model(X_test_scaled.unsqueeze(-1)).cpu().numpy()
 
         test_predictions_unscaled = inverse_log_transform(test_predictions_scaled)
-        time_values_plot = time_values[:len(test_predictions_scaled)]
+        time_values_plot = time_values[:len(test_predictions_scaled)] #time_values[window_size:len(test_predictions_scaled) + window_size]
 
         if has_true_values:
             y_test_unscaled = inverse_log_transform(y_test_scaled.numpy())
@@ -142,11 +141,14 @@ def plot_predictions(test_data, run_column, time_column, selected_runs, model, d
         titles = ["Prevalence", "EIR", "Incidence"]
         predictions = [X_test_unscaled[:, -1], test_predictions_unscaled[:, 0], test_predictions_unscaled[:, 1]]
         true_values = [None, y_test_unscaled[:, 0] if has_true_values else None, y_test_unscaled[:, 1] if has_true_values else None]
-        log_scales = [log_all, log_eir or log_all, log_inc or log_all] #JA
-        #log_scales = [False, log_eir, log_inc]
+        log_scales = [log_all, log_eir or log_all, log_inc or log_all]
 
         for ax, title, color, pred, true_val, log_scale in zip(axes[i], titles, colors, predictions, true_values, log_scales):
-            ax.plot(time_values_plot, pred, linestyle="--", color=color, label=f"{title}" if title == "Prevalence" else f"Estimated {title}", linewidth=2.5)
+            if title == "Prevalence":
+                prev_true_adjusted = run_data['prev_true'].values[:len(pred)]  # Ensuring prevalence starts at index 0 and aligns
+                ax.plot(time_values[:len(prev_true_adjusted)], prev_true_adjusted, linestyle="--", color=color, label="Prevalence", linewidth=2.5)
+            else:
+                ax.plot(time_values_plot, pred, linestyle="--", color=color, label=f"Estimated {title}", linewidth=2.5)
             if true_val is not None:
                 ax.plot(time_values_plot, true_val, color="black", linestyle="-", label=f"True {title}", linewidth=2)
             if log_scale:
@@ -154,22 +156,21 @@ def plot_predictions(test_data, run_column, time_column, selected_runs, model, d
             ax.set_title(f"{run} - {title}", fontsize=14, color="#FF4B4B")
             ax.set_ylabel(title, fontsize=12)
             ax.legend()
-
             # if log_all:
             #     min_y = min(ax.get_ylim()[0] for ax in axes.flatten())
             #     max_y = max(ax.get_ylim()[1] for ax in axes.flatten())
             #     for ax in axes.flatten():
             #         ax.set_ylim(min_y, max_y)
 
-        data_to_download.append(pd.DataFrame({ #JA
+        data_to_download.append(pd.DataFrame({ 
             "Prevalence": predictions[0],
             "Estimated EIR": predictions[1],
             "Estimated Incidence": predictions[2]
-        })) #JA
+        })) 
 
     for ax in axes[-1]:  
         if is_string_time:
-            tick_indices = np.linspace(0, len(time_values_plot) - 1, num=min(10, len(time_values_plot)), dtype=int)  
+            tick_indices = np.arange(0, len(time_values_plot), step=6, dtype=int) #np.linspace(0, len(time_values_plot) - 1, num=min(8, len(time_values_plot)), dtype=int)  #Choice of tick to be decided soon
             ax.set_xticks(time_values_plot[tick_indices])  
             ax.set_xticklabels(np.array(time_labels)[tick_indices], rotation=45, fontsize=10)  
         else:
