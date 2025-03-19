@@ -56,9 +56,14 @@ def load_model(model_path):
 # Function to preprocess data
 def preprocess_data(df):
     log_transform = lambda x: np.log(x + 1e-8)
+
+    # Sanity Check for selected prevalence column
+    if not pd.api.types.is_numeric_dtype(df['prev_true']):
+        st.error("🚨 The selected prevalence column is invalid. It contains non-numeric values.")
+        return None, False  # Return None to indicate failure
     
     has_true_values = {'EIR_true', 'incall'}.issubset(df.columns)
-    
+
     if has_true_values:
         df_scaled = df[['prev_true', 'EIR_true', 'incall']].apply(log_transform)
     else:
@@ -71,15 +76,20 @@ def convert_time_column(df, time_column):
     try:
         if pd.api.types.is_numeric_dtype(df[time_column]):
             return df[time_column].astype(float) / 365.25  # Convert days to years
+        else:
+            df[time_column] = pd.to_datetime(df[time_column], errors='coerce', format='%b-%y')  # Example: "Jan-16"
+            
+            if df[time_column].isna().all():
+                st.error("Could not parse the time column. Ensure it's a proper date format (e.g., Jan-16).")
+                return None
         
-        df[time_column] = pd.to_datetime(df[time_column], errors='coerce', format='%b-%y')  # Example: "Jan-16"
-        
-        if df[time_column].isna().all():
-            st.error("Could not parse the time column. Ensure it's a proper date format (e.g., Jan-16).")
+            start_year = df[time_column].dt.year.min()
+            df['time_in_years'] = df[time_column].dt.year + (df[time_column].dt.month - 1) / 12 - start_year
+
+        if len(df['time_in_years']) != len(df):
+            st.error(f"🚨 Mismatch error, possibly due to invalid time column selection'{time_column}' – expected {len(df)} values but found {len(df['time_in_years'])}. "
+                     "Please verify your dataset.")
             return None
-        
-        start_year = df[time_column].dt.year.min()
-        df['time_in_years'] = df[time_column].dt.year + (df[time_column].dt.month - 1) / 12 - start_year
         return df['time_in_years']
     
     except Exception as e:
@@ -95,8 +105,17 @@ def plot_predictions(test_data, run_column, time_column, selected_runs, model, d
     is_string_time = not pd.api.types.is_numeric_dtype(test_data[time_column])
     
     if is_string_time:
-        time_labels = test_data[time_column].unique()
+        # time_labels = test_data[time_column].unique() 
+        # time_values = np.arange(len(time_labels))
+
+        time_labels = filtered_data[time_column].unique() #Create time values for the filtered data
         time_values = np.arange(len(time_labels))
+
+        # if len(time_values) != len(filtered_data):
+        #     error_message= f"⚠️ Mismatch detected: Time values ({len(time_values)}) vs Prevalence values ({len(filtered_data)}). Adjusting time values."
+        #     st.error(error_message)
+        #     st.stop()
+ 
     else:
         time_values = test_data[time_column].astype(float) / 365.25
         time_labels = None  
@@ -188,6 +207,33 @@ def plot_predictions(test_data, run_column, time_column, selected_runs, model, d
 # Streamlit UI
 st.title("🔬 Malaria Incidence and EIR Estimator with AI")
 
+# # File upload
+# uploaded_file = st.file_uploader("📂 Upload prevalence data to estimate (CSV)", type=["csv"])
+# if uploaded_file:
+#     test_data = pd.read_csv(uploaded_file)
+
+#     columns = test_data.columns.tolist()
+
+#     run_column = st.selectbox("🔄 Select geographical unit(s) e.g. Region, District, Province...", columns) if 'run' not in columns else 'run'
+#     time_column = st.selectbox("🕒 Select time column", columns) if 't' not in columns else 't'
+
+#     unique_runs = test_data[run_column].unique()
+#     selected_runs = st.multiselect(f"📊 Select {run_column}(s) to estimate", unique_runs, default=unique_runs[:1])
+
+#     model_path = "src/trained_model/4_layers_model.pth"
+#     window_size = 10
+#     model, device = load_model(model_path)
+
+#     _, has_true_values = preprocess_data(test_data)
+
+#     log_eir = st.checkbox("📈 View EIR on Log Scale", value=False)
+#     log_inc = st.checkbox("📉 View Incidence on Log Scale", value=False)
+#     log_all = st.checkbox("🔍 View All Plots on Log Scale", value=False)
+
+#     if selected_runs:
+#         plot_predictions(test_data, run_column, time_column, selected_runs, model, device, window_size, log_eir, log_inc, log_all, has_true_values)
+
+
 # File upload
 uploaded_file = st.file_uploader("📂 Upload prevalence data to estimate (CSV)", type=["csv"])
 if uploaded_file:
@@ -195,18 +241,32 @@ if uploaded_file:
 
     columns = test_data.columns.tolist()
 
-    run_column = st.selectbox("🔄 Select run column e.g. Region, District, Province...", columns) if 'run' not in columns else 'run'
+    run_column = st.selectbox("🔄 Select geographical unit(s) e.g. Region, District, Province...", columns) if 'run' not in columns else 'run'
+    
     time_column = st.selectbox("🕒 Select time column", columns) if 't' not in columns else 't'
 
     unique_runs = test_data[run_column].unique()
-    selected_runs = st.multiselect(f"📊 Select {run_column}(s) to estimate", unique_runs, default=unique_runs[:1])
+    selected_runs = st.multiselect(f"📊 Select {run_column}(s) to estimate", unique_runs, default=unique_runs[:0])
+
+    # Filter the data based on selected runs
+    filtered_data = test_data[test_data[run_column].isin(selected_runs)]
+
+    if 'prev_true' not in columns:
+        
+        prevalence_column = st.selectbox("🩸 Select the column corresponding to prevalence", columns)#, key=f"prevalence_select_{key_suffix}")
+        test_data = test_data.rename(columns={prevalence_column: 'prev_true'})
+
+    
 
     model_path = "src/trained_model/4_layers_model.pth"
     window_size = 10
     model, device = load_model(model_path)
 
-    _, has_true_values = preprocess_data(test_data)
+    df_scaled, has_true_values = preprocess_data(test_data)
 
+    if df_scaled is None:
+        st.stop()  # Stop further execution if preprocessing fails
+        
     log_eir = st.checkbox("📈 View EIR on Log Scale", value=False)
     log_inc = st.checkbox("📉 View Incidence on Log Scale", value=False)
     log_all = st.checkbox("🔍 View All Plots on Log Scale", value=False)
