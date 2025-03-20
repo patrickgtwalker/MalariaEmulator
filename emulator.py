@@ -207,32 +207,6 @@ def plot_predictions(test_data, run_column, time_column, selected_runs, model, d
 # Streamlit UI
 st.title("🔬 Malaria Incidence and EIR Estimator with AI")
 
-# # File upload
-# uploaded_file = st.file_uploader("📂 Upload prevalence data to estimate (CSV)", type=["csv"])
-# if uploaded_file:
-#     test_data = pd.read_csv(uploaded_file)
-
-#     columns = test_data.columns.tolist()
-
-#     run_column = st.selectbox("🔄 Select geographical unit(s) e.g. Region, District, Province...", columns) if 'run' not in columns else 'run'
-#     time_column = st.selectbox("🕒 Select time column", columns) if 't' not in columns else 't'
-
-#     unique_runs = test_data[run_column].unique()
-#     selected_runs = st.multiselect(f"📊 Select {run_column}(s) to estimate", unique_runs, default=unique_runs[:1])
-
-#     model_path = "src/trained_model/4_layers_model.pth"
-#     window_size = 10
-#     model, device = load_model(model_path)
-
-#     _, has_true_values = preprocess_data(test_data)
-
-#     log_eir = st.checkbox("📈 View EIR on Log Scale", value=False)
-#     log_inc = st.checkbox("📉 View Incidence on Log Scale", value=False)
-#     log_all = st.checkbox("🔍 View All Plots on Log Scale", value=False)
-
-#     if selected_runs:
-#         plot_predictions(test_data, run_column, time_column, selected_runs, model, device, window_size, log_eir, log_inc, log_all, has_true_values)
-
 
 # File upload
 uploaded_file = st.file_uploader("📂 Upload prevalence data to estimate (CSV)", type=["csv"])
