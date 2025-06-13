@@ -97,26 +97,6 @@ def convert_time_column(df, time_column):
         return None
 
 
-def plot_predictions(test_data, run_column, time_column, selected_runs, model, device, window_size, log_eir, log_inc, log_all, has_true_values):
-    log_transform = lambda x: np.log(x + 1e-8)
-    inverse_log_transform = lambda x: np.exp(x) - 1e-8
-
-    is_string_time = not pd.api.types.is_numeric_dtype(test_data[time_column])
-
-    if is_string_time:
-        time_labels = test_data[time_column].unique()
-        time_values = np.arange(len(time_labels))
-    else:
-        time_values = test_data[time_column].astype(float) / 365.25
-        time_labels = None
-
-    num_plots = len(selected_runs)
-    fig, axes = plt.subplots(num_plots, 2, figsize=(12, 5 * num_plots), sharex=True)
-    if num_plots == 1:
-        axes = np.expand_dims(axes, axis=0)
-
-    colors = sns.color_palette("muted", 3)
-    data_to_download = []
 
 def compute_global_yaxis_limits(data, selected_runs, run_column, window_size, model, device, has_true_values):
     log_transform = lambda x: np.log(x + 1e-8)
@@ -254,6 +234,17 @@ def plot_predictions(test_data, run_column, time_column, selected_runs, model, d
         csv_data = combined_data.to_csv(index=False).encode('utf-8')
         st.download_button("📥 Download Estimates as CSV", data=csv_data, file_name="predictions.csv", mime="text/csv")
 
+def adjust_trailing_zero_prevalence(df, prevalence_column='prev_true', min_val=0.0001, max_val=0.0009, seed=None):
+    df = df.copy()
+    zeros_mask = df[prevalence_column] == 0
+    num_zeros = zeros_mask.sum()
+
+    if num_zeros > 0:
+        st.warning(f"⚠️ Found {num_zeros} zero prevalence value(s); replacing with random values between {min_val} and {max_val}.")
+        rng = np.random.default_rng(seed)  # Create random generator with optional seed
+        random_values = rng.uniform(min_val, max_val, size=num_zeros)
+        df.loc[zeros_mask, prevalence_column] = random_values
+    return df
 
 # Streamlit UI
 st.title("🔬 Malaria Incidence and EIR Estimator with AI")
@@ -297,7 +288,7 @@ if 'prev_true' not in columns:
     
     prevalence_column = st.selectbox("🩸 Select the column corresponding to prevalence", columns)#, key=f"prevalence_select_{key_suffix}")
     test_data = test_data.rename(columns={prevalence_column: 'prev_true'})
-
+test_data = adjust_trailing_zero_prevalence(test_data, prevalence_column='prev_true', seed=42)
 
 
 model_path = "src/trained_model/4_layers_model.pth"
