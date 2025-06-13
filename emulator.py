@@ -265,11 +265,25 @@ if data_source == "Use preloaded test data":
         st.error(f"Failed to load preloaded data: {e}")
         st.stop()
 else:
-    uploaded_file = st.file_uploader("📂 Upload prevalence data to estimate (CSV/Excel)", type=["csv", "xls", "xlsx"])
+    uploaded_file = st.file_uploader("📂 Upload prevalence data to estimate (CSV or Excel)", type=["csv", "xls", "xlsx"])
+    
     if uploaded_file:
-        test_data = pd.read_csv(uploaded_file)
+        file_name = uploaded_file.name.lower()
+
+        try:
+            if file_name.endswith(".csv"):
+                test_data = pd.read_csv(uploaded_file)
+            elif file_name.endswith((".xls", ".xlsx")):
+                test_data = pd.read_excel(uploaded_file)
+            else:
+                st.error("Unsupported file type. Please upload a CSV or Excel file.")
+                st.stop()
+        except Exception as e:
+            st.error(f"❌ Error reading file: {e}")
+            st.stop()
+
     else:
-        st.warning("Please upload a CSV file to continue.")
+        st.warning("Please upload a CSV or Excel file to continue.")
         st.stop()
 
 columns = test_data.columns.tolist()
