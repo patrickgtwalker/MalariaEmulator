@@ -240,7 +240,7 @@ def adjust_trailing_zero_prevalence(df, prevalence_column='prev_true', min_val=0
     num_zeros = zeros_mask.sum()
 
     if num_zeros > 0:
-        st.warning(f"⚠️ Found {num_zeros} zero prevalence value(s); replacing with random values between {min_val} and {max_val}.")
+        #st.warning(f"⚠️ Found {num_zeros} zero prevalence value(s); replacing with random values between {min_val} and {max_val}.")
         rng = np.random.default_rng(seed)  # Create random generator with optional seed
         random_values = rng.uniform(min_val, max_val, size=num_zeros)
         df.loc[zeros_mask, prevalence_column] = random_values
