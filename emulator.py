@@ -265,7 +265,7 @@ if data_source == "Use preloaded test data":
         st.error(f"Failed to load preloaded data: {e}")
         st.stop()
 else:
-    uploaded_file = st.file_uploader("📂 Upload prevalence data to estimate (CSV)", type=["csv"])
+    uploaded_file = st.file_uploader("📂 Upload prevalence data to estimate (CSV/Excel)", type=["csv", "xls", "xlsx"])
     if uploaded_file:
         test_data = pd.read_csv(uploaded_file)
     else:
