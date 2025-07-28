@@ -40,7 +40,7 @@ project_root/
 │   ├── test.py           # Model testing
 │   ├── utils.py          # Utility functions (metrics, visualization, etc.)
 |   ├── inference.py      # Specifically used for inferencing within training notebook
-|   ├── inference_util.py # Specically used for dashboard inferencing
+|   ├── inference_util.py # Specifically used for dashboard inferencing
 
 │── test/                # Unit tests
 │   ├── test_data         # Contains a thousand test runs across different transmission intensities
@@ -49,7 +49,7 @@ project_root/
 │── README.md             # Project overview and instructions
 │── emulator.py           # Python script containing deployed streamlit dashboard
 │── emulator_one_model.py # Emulator variant predicting with one model   
-│──emulator_two_model.py # Emulator variant predicting with two models
+│── emulator_two_model.py # Emulator variant predicting with two models
 │── .gitignore            # Ignored files (e.g., __pycache__, .venv)
 │── setup.py              # Setup script (to be updated)
 │── pyproject.toml        # Modern package management (to be updated)
