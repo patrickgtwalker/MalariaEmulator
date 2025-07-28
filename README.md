@@ -1,6 +1,6 @@
 # Prevalence Prediction and Simulation Analysis
 
-This project aims to provide tool for estimating malaria incidence and transmission intensity through emulation of timeseries prevalence data. It includes helper functions, data processing, and machine learning models to create predictive systems using simulation data frpm malsimgem.
+This project aims to provide tool for estimating malaria incidence and transmission intensity from timeseries prevalence data through emulation of mechanistic Malaria transmission model. It includes helper functions, data processing, and machine learning models pipeline to create predictive systems using simulation data from malsimgem.
 
 ## Repository Overview
 
@@ -9,6 +9,7 @@ This project aims to provide tool for estimating malaria incidence and transmiss
   - `model_exp.py`
   - `sequence_creator.py`
 - Custom functions for preprocessing simulation data.
+- Dashboard for estimating incidence and transmission intensities/EIR 'emulator.py'
 
 ---
 
@@ -38,17 +39,25 @@ project_root/
 │   ├── model_exp.py      # Defines PyTorch model and training
 │   ├── test.py           # Model testing
 │   ├── utils.py          # Utility functions (metrics, visualization, etc.)
-|   ├── inference.py           
+|   ├── inference.py      # Specifically used for inferencing within training notebook
+|   ├── inference_util.py # Specically used for dashboard inferencing
+
 │── test/                # Unit tests
-│   ├── test_data         # Aim to test model under various conditions - seasonality, randomwalk, routine data...
-│── notebooks/            # Jupyter notebooks 
+│   ├── test_data         # Contains a thousand test runs across different transmission intensities
+│── notebooks/            # Jupyter notebooks (to be updated with recent experiments)
 │── requirements.txt      # Dependencies
 │── README.md             # Project overview and instructions
+│── emulator.py           # Python script containing deployed streamlit dashboard
+│── emulator_one_model.py # Emulator variant predicting with one model   
+│──emulator_two_model.py # Emulator variant predicting with two models
 │── .gitignore            # Ignored files (e.g., __pycache__, .venv)
 │── setup.py              # Setup script (to be updated)
 │── pyproject.toml        # Modern package management (to be updated)
 ├── ANC_Emulator_PyTorch.ipynb  # Main analysis notebook
 ├── data/                  # simulated data from mamasante/malsimgem
-├── sequence_creator_multi_inputs_outputs.py  # Sequence generation for ML training
 ├── plots/                 # Saved visuals
 
+
+https://estimatemalariaparameters.streamlit.app/
+
+![alt text](<Screenshot (1)-2.png>)
