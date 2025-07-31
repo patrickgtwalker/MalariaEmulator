@@ -66,3 +66,10 @@ project_root/
 https://estimatemalariaparameters.streamlit.app/
 
 ![alt text](<Screenshot (1)-2.png>)
+## Training Two LSTM Models
+
+The script `src/train_dual_models.py` trains two LSTM variants:
+1. **Baseline Model** – uses sequences of ANC prevalence only.
+2. **With Start Prevalence** – includes the run's starting prevalence as a constant feature.
+
+Run `python src/train_dual_models.py --csv <path-to-data>` to train both models and display comparative evaluation plots.
