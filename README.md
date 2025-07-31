@@ -8,6 +8,8 @@ This project aims to provide tool for estimating malaria incidence and transmiss
 - Helper scripts for sequence creation and model development:
   - `model_exp.py`
   - `sequence_creator.py`
+  - `create_sequences_with_baseline` for including the starting prevalence as a
+    feature during training
 - Custom functions for preprocessing simulation data.
 - Dashboard for estimating incidence and transmission intensities/EIR 'emulator.py'
 
@@ -24,6 +26,8 @@ This project aims to provide tool for estimating malaria incidence and transmiss
 
 3. **Sequence Creation**
    - Processes time-series data to generate input-output pairs suitable for model training, handling padding for initial time steps.
+   - `create_sequences_with_baseline` allows models to learn from the initial
+     prevalence value of each run.
 
 4. **Machine Learning Model**
    - Implements an LSTM-based architecture to predict malaria metrics (`EIR_true`, `incall`) using simulation data.
@@ -36,6 +40,7 @@ project_root/
 │── src/                  # Source code/functions directory
 │   ├── preprocessing.py  # Handles data loading and preprocessing
 │   ├── sequence_creator.py  # Creates birectional sequences of tensors
+│   ├── create_sequences_with_baseline  # Adds initial prevalence as a feature
 │   ├── model_exp.py      # Defines PyTorch model and training
 │   ├── test.py           # Model testing
 │   ├── utils.py          # Utility functions (metrics, visualization, etc.)
