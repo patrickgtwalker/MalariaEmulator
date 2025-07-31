@@ -4,6 +4,17 @@ This project aims to provide tool for estimating malaria incidence and transmiss
 
 ## Repository Overview
 
+## Installation
+To install the project dependencies, run:
+```
+pip install -r requirements.txt
+```
+You can also install the package in editable mode:
+```
+pip install -e .
+```
+
+
 - A primary Jupyter Notebook: `ANC_Emulator_PyTorch.ipynb`
 - Helper scripts for sequence creation and model development:
   - `model_exp.py`
@@ -56,8 +67,8 @@ project_root/
 │── emulator_one_model.py # Emulator variant predicting with one model   
 │── emulator_two_model.py # Emulator variant predicting with two models
 │── .gitignore            # Ignored files (e.g., __pycache__, .venv)
-│── setup.py              # Setup script (to be updated)
-│── pyproject.toml        # Modern package management (to be updated)
+│── setup.py              # Setup script
+│── pyproject.toml        # Modern package management
 ├── ANC_Emulator_PyTorch.ipynb  # Main analysis notebook
 ├── data/                  # simulated data from mamasante/malsimgem
 ├── plots/                 # Saved visuals
