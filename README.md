@@ -73,3 +73,11 @@ The script `src/train_dual_models.py` trains two LSTM variants:
 2. **With Start Prevalence** – includes the run's starting prevalence as a constant feature.
 
 Run `python src/train_dual_models.py --csv <path-to-data>` to train both models and display comparative evaluation plots.
+
+The command writes two model weights under `src/trained_model/`:
+`baseline_model.pth` for the standard ANC-only model and `start_prev_model.pth`
+for the variant that includes starting prevalence. Training metrics and
+evaluation figures are automatically saved in the `plots/` directory. Key output
+files include the training-loss curves and a summary of validation metrics in
+`plots/model_perfomance/`.
+Open these images after training to visually compare the two approaches.
