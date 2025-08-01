@@ -1,3 +1,15 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:3f11b69673392e52212908736cb65b0a5b3ffcdfbc1cc699b4e441d50e7264b4
-size 490
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Input, LSTM, Dense
+
+# Defining model arch.
+def create_model(seq_length):
+    model = Sequential([
+        Input(shape=(seq_length, 1)),
+        LSTM(200, return_sequences=True, activation='tanh'),
+        LSTM(100, return_sequences=True, activation='tanh'),
+        LSTM(50, activation='tanh'),
+        Dense(1)
+    ])
+    model.compile(optimizer='adam', loss='mse')
+    return model

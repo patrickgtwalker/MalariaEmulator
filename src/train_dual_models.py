@@ -58,7 +58,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch", type=int, default=512, help="Batch size")
     parser.add_argument("--epochs", type=int, default=25, help="Training epochs")
     main(parser.parse_args())
-=======
+    
 from src.preprocessing import process_dataframe
 from src.sequence_creator import create_sequences
 from src.model_exp import LSTMModel
