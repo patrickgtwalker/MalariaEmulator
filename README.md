@@ -73,3 +73,17 @@ The script `src/train_dual_models.py` trains two LSTM variants:
 2. **With Start Prevalence** – includes the run's starting prevalence as a constant feature.
 
 Run `python src/train_dual_models.py --csv <path-to-data>` to train both models and display comparative evaluation plots.
+
+### Example
+
+```bash
+python src/train_dual_models.py --csv data/anc_runs.csv --window 10 --epochs 25 --batch 512
+```
+
+This command trains the baseline LSTM (ANC prevalence only) and the variant that includes the starting prevalence value at time `t=0`. After training the script automatically generates several figures under `plots/`:
+
+* `plots/model_performance/training_loss_25000runs_at_Equilibrium.png`
+* `plots/model_performance/model_comparison_25000runs_at_Equilibrium.png`
+* `plots/test_prediction/performance_metrics_25000runs_at_Equilibrium.png`
+
+These images summarize the training loss curves, compare model sizes and durations, and show R²/MSE/MAE metrics on the evaluation set.
